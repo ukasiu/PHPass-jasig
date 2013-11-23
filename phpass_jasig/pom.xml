@@ -7,19 +7,9 @@
   <version>1.0-SNAPSHOT</version>
   <name>phpass_jasig</name>
   <url>http://maven.apache.org</url>
-  <build>
-     <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.1</version>
-            <configuration>
-                <source>1.5</source>
-                <target>1.5</target> <!-- hack for generics -->
-            </configuration>
-        </plugin>
-     </plugins>
-   </build>
+  <properties>
+      <github.global.server>github</github.global.server>
+  </properties>
     <dependencies>
     <dependency>
       <groupId>org.jasig.cas</groupId>
@@ -43,11 +33,56 @@
     </dependency>
   </dependencies>
   <repositories>
-      <!--other repositories if any-->
-      <repository>
-          <id>project.local</id>
-          <name>project</name>
-          <url>file:/home/ukasiu/repos/maven</url>
-      </repository>
+    <repository>
+        <id>PHPass-mvn-repo</id>
+        <url>https://raw.github.com/ukasiu/PHPass/mvn-repo/</url>
+        <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>always</updatePolicy>
+        </snapshots>
+    </repository>
   </repositories>
+  <distributionManagement>
+      <repository>
+          <id>internal.repo</id>
+          <name>Temporary Staging Repository</name>
+          <url>file://${project.build.directory}/mvn-repo</url>
+      </repository>
+  </distributionManagement>
+  <build>
+      <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>3.1</version>
+              <configuration>
+                  <source>1.5</source>
+                  <target>1.5</target> <!-- hack for generics -->
+              </configuration>
+          </plugin>
+          <plugin>
+              <groupId>com.github.github</groupId>
+              <artifactId>site-maven-plugin</artifactId>
+              <version>0.8</version>
+              <configuration>
+                  <message>Maven artifacts for ${project.version}</message>  <!-- git commit message -->
+                  <noJekyll>true</noJekyll>                                  <!-- disable webpage processing -->
+                  <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
+                  <branch>refs/heads/mvn-repo</branch>                       <!-- remote branch name -->
+                  <includes><include>**/*</include></includes>
+                  <repositoryName>PHPass-jasig</repositoryName>      <!-- github repo name -->
+                  <repositoryOwner>ukasiu</repositoryOwner>    <!-- github username  -->
+              </configuration>
+              <executions>
+                <!-- run site-maven-plugin's 'site' target as part of the build's normal 'deploy' phase -->
+                <execution>
+                  <goals>
+                    <goal>site</goal>
+                  </goals>
+                  <phase>deploy</phase>
+                </execution>
+              </executions>
+          </plugin>
+      </plugins>
+  </build>
 </project>
